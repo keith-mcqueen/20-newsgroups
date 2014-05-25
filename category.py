@@ -2,13 +2,10 @@ import os
 from article import parse_article
 
 def categorize(dirpath, catname, stop_words=None):
-    print dirpath
-    print catname
-
     word_counts = {}
 
     article_count = 0
-    catpath = dirpath + os.sep + catname
+    catpath = os.path.join(dirpath, catname)
     for article in os.listdir(catpath):
         article_count += 1
 

@@ -7,6 +7,5 @@ def parse_article(filepath, filename, dictionary, stop_words=None):
 
     # read the words
     for line in file:
-        print line
-
-    pass
+        #print line
+        pass
