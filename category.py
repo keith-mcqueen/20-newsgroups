@@ -1,15 +1,60 @@
 import os
+import json
 from article import parse_article
 
-def categorize(dirpath, catname, stop_words=None):
-    word_counts = {}
+JSON_EXT = ".json"
+WORDS_KEY = "words"
+ARTICLES_KEY = "articles"
 
-    article_count = 0
-    catpath = os.path.join(dirpath, catname)
-    for article in os.listdir(catpath):
-        article_count += 1
 
-        # TODO add exception handling
-        parse_article(catpath, article, word_counts, stop_words)
+class Category:
+    def __init__(self, database_path, category_name, stop_words):
+        self.database_path = database_path
+        self.category_name = category_name
+        self.stop_words = stop_words
+        self.article_count = 0
+        self.word_counts = {}
 
-    return word_counts, article_count
+    def load(self):
+        try:
+            # open the data file
+            with open(os.path.join(self.database_path, self.category_name + JSON_EXT), "r") as in_file:
+                # read the data file into a json dictionary
+                input = json.load(in_file)
+
+                # make sure the ARTICLES_KEY and the WORDS_KEY are in the dictionary
+                if not ARTICLES_KEY in input or not WORDS_KEY in input:
+                    return False
+
+                # save the article count and the word count
+                self.article_count = input[ARTICLES_KEY]
+                self.word_counts = input[WORDS_KEY]
+
+                print "Loaded category %s from %s" % (self.category_name, in_file.name)
+        except Exception, e:
+            # if there was a problem, then the category did not load successfully
+            return False
+
+        # there were no problems loading the data file
+        return True
+
+    def save(self):
+        # prepare the output dictionary with the article count and the word count
+        output = {ARTICLES_KEY: self.article_count, WORDS_KEY: self.word_counts}
+
+        # open the output .json file for writing
+        with open(os.path.join(self.database_path, self.category_name + JSON_EXT), "w") as out_file:
+            print "Writing results of categorizing %s to %s" % (self.category_name, out_file.name)
+
+            # dump the output dictionary to the .json file
+            json.dump(output, out_file)
+
+        # the file was saved successfully
+        return True
+
+    def categorize(self, path):
+        for article in os.listdir(path):
+            self.article_count += 1
+
+            # TODO add exception handling
+            parse_article(path, article, self.word_counts, self.stop_words)

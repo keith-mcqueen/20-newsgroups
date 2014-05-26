@@ -1,8 +1,7 @@
 import argparse
 import os
 import errno
-import json
-from category import categorize
+from category import Category
 
 
 class Classifier:
@@ -14,6 +13,9 @@ class Classifier:
 
         # parse the arguments
         self.parse_args()
+
+        # prepare the categories collection
+        self.categories = {}
 
     def parse_args(self):
         # set up the arg-parser
@@ -76,24 +78,33 @@ class Classifier:
 
     def learn(self):
         # for each directory in the document root...
-        for category in os.listdir(self.docroot):
+        for category_name in os.listdir(self.docroot):
+            category_path = os.path.join(self.docroot, category_name)
+
             # if the category is a file (not a directory), then skip it
-            if os.path.isfile(category):
+            if os.path.isfile(category_path):
                 continue
 
+            category = Category(self.database, category_name, self.stop_list)
+            self.categories[category_name] = category
+
             # call the function to handle the directory/category
-            word_count, article_count = categorize(self.docroot, category, self.stop_list)
+            category.categorize(category_path)
+            category.save()
 
-            output = {}
-            output["articles"] = article_count
-            output["words"] = word_count
+    def load_categories(self):
+        for filename in os.listdir(self.database):
+            category_name = os.path.splitext(filename)[0]
 
-            # write the returned dictionary out to the category/directory name in the database
-            with open(os.path.join(self.database, category + ".json"), "w") as out_file:
-                print "Writing results of categorizing %s to %s" % (category, out_file.name)
-                json.dump(output, out_file)
+            category = Category(self.database, category_name, self.stop_list)
+            if category.load():
+                self.categories[category_name] = category
 
     def classify(self):
+        # load all the Category instances from the database
+        self.load_categories()
+
+        # TODO now what?
         pass
 
 
