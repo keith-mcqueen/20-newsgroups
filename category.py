@@ -20,8 +20,9 @@ class Category:
             # open the data file
             with open(os.path.join(self.database_path, self.category_name + JSON_EXT), "r") as in_file:
                 # read the data file into a json dictionary
+                
                 input = json.load(in_file)
-
+                          
                 # make sure the ARTICLES_KEY and the WORDS_KEY are in the dictionary
                 if not ARTICLES_KEY in input or not WORDS_KEY in input:
                     return False
@@ -33,9 +34,12 @@ class Category:
                 print "Loaded category %s from %s" % (self.category_name, in_file.name)
         except Exception, e:
             # if there was a problem, then the category did not load successfully
+            print str(e)            
+            print "problem"
             return False
 
         # there were no problems loading the data file
+        print " no problem"
         return True
 
     def save(self):
@@ -47,7 +51,7 @@ class Category:
             print "Writing results of categorizing %s to %s" % (self.category_name, out_file.name)
 
             # dump the output dictionary to the .json file
-            json.dump(unicode((output)), out_file)
+            json.dump(output, out_file)
 
         # the file was saved successfully
         return True

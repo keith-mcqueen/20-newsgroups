@@ -103,7 +103,7 @@ class Classifier:
     def classify(self):
         # load all the Category instances from the database
         self.load_categories()
-
+        print "loading..."  
         # TODO now what?
         pass
 
