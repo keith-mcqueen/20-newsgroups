@@ -47,7 +47,7 @@ class Category:
             print "Writing results of categorizing %s to %s" % (self.category_name, out_file.name)
 
             # dump the output dictionary to the .json file
-            json.dump((unicode(output), "ISO-8859-1"), out_file)
+            json.dump(unicode((output)), out_file)
 
         # the file was saved successfully
         return True
