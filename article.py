@@ -9,4 +9,4 @@ def parse_article(filepath, filename, dictionary, stop_words=None):
             word = word.lower()
             dictionary[word] = dictionary.setdefault(word, 0) + 1
 
-    print str(dictionary)
+    #print str(dictionary)
