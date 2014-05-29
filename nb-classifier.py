@@ -3,9 +3,14 @@ import os
 import errno
 import math
 import sys
+import json
+
 import models
 from category import Category
 from article import parse_article
+
+
+JSON_EXT = ".json"
 
 
 class Classifier:
@@ -15,6 +20,7 @@ class Classifier:
         self.is_training = False
         self.stop_list = frozenset()
         self.confusion_matrix = {}
+        self.model = "baseline"
         self.model = models.baseline
 
         # parse the arguments
@@ -80,9 +86,8 @@ class Classifier:
 
         self.is_training = args.training
 
-        print args.model
         self.model = getattr(models, args.model)
-        print self.model
+        self.model_name = args.model
 
         # load the list of stop words
         try:
@@ -129,9 +134,8 @@ class Classifier:
             category = self.categories[category_name]
             category.prior_probability = math.log(float(category.article_count) / float(self.total_articles))
             print "Prior probability for category: %s is %s articles out of %s total articles = %s" % (
-            category_name, category.article_count, self.total_articles, category.prior_probability)
+                category_name, category.article_count, self.total_articles, category.prior_probability)
 
-        # TODO now what?
         for category_name in os.listdir(self.docroot):
             category_path = os.path.join(self.docroot, category_name)
 
@@ -141,7 +145,13 @@ class Classifier:
 
             self.classify_category(category_path, self.model)
 
-        print self.confusion_matrix
+        #print self.confusion_matrix
+        # open the output .json file for writing
+        with open(os.path.join(self.docroot, self.model_name + JSON_EXT), "w") as out_file:
+            print "Writing results of classification to %s" % out_file.name
+
+            # dump the output dictionary to the .json file
+            json.dump(self.confusion_matrix, out_file)
 
     def classify_category(self, category_path, model_func):
         confusion_row = {}
