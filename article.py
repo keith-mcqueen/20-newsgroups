@@ -1,6 +1,7 @@
 import os
 import re
 
+
 def parse_article(filepath, filename, dictionary, stop_words=None):
     # load the file
     article_path = os.path.join(filepath, filename)

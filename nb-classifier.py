@@ -1,6 +1,7 @@
 import argparse
 import os
 import errno
+import math
 from category import Category
 
 
@@ -16,6 +17,7 @@ class Classifier:
 
         # prepare the categories collection
         self.categories = {}
+        self.total_articles = 0
 
     def parse_args(self):
         # set up the arg-parser
@@ -98,23 +100,36 @@ class Classifier:
 
             category = Category(self.database, category_name, self.stop_list)
             if category.load():
+                self.total_articles += category.article_count
                 self.categories[category_name] = category
 
     def classify(self):
         # load all the Category instances from the database
         self.load_categories()
-        print "loading..."  
+
+        # with all categories loaded, assign each their prior probability
+        # (P(C=cat)) which is the number of documents in the category divided
+        # by total number of documents
+        for category_name in self.categories:
+            category = self.categories[category_name]
+            category.prior_probability = math.log(float(category.article_count) / float(self.total_articles))
+            print "Prior probability for category: %s is %s articles out of %s total articles = %s" % (category_name, category.article_count, self.total_articles, category.prior_probability)
+
         # TODO now what?
-        pass
 
 
 if __name__ == '__main__':
     c = Classifier()
 
-    try:
-        if c.is_training:
-            c.learn()
-        else:
-            c.classify()
-    except Exception, e:
-        print e
+    # try:
+    #     if c.is_training:
+    #         c.learn()
+    #     else:
+    #         c.classify()
+    # except Exception, e:
+    #     print e
+
+    if c.is_training:
+        c.learn()
+    else:
+        c.classify()

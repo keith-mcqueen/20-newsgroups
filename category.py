@@ -14,32 +14,34 @@ class Category:
         self.stop_words = stop_words
         self.article_count = 0
         self.word_counts = {}
+        self.total_words = 0
+        self.prior_probability = 0
 
     def load(self):
         try:
             # open the data file
             with open(os.path.join(self.database_path, self.category_name + JSON_EXT), "r") as in_file:
+                print "Loading category %s from %s" % (self.category_name, in_file.name)
                 # read the data file into a json dictionary
                 
-                input = json.load(in_file)
+                data = json.load(in_file)
                           
                 # make sure the ARTICLES_KEY and the WORDS_KEY are in the dictionary
-                if not ARTICLES_KEY in input or not WORDS_KEY in input:
+                if not ARTICLES_KEY in data or not WORDS_KEY in data:
                     return False
 
                 # save the article count and the word count
-                self.article_count = input[ARTICLES_KEY]
-                self.word_counts = input[WORDS_KEY]
+                self.article_count = data[ARTICLES_KEY]
+                self.word_counts = data[WORDS_KEY]
 
-                print "Loaded category %s from %s" % (self.category_name, in_file.name)
+            # sum up all of the word counts
+            self.total_words = sum(self.word_counts.itervalues())
         except Exception, e:
             # if there was a problem, then the category did not load successfully
-            print str(e)            
-            print "problem"
+            print e
             return False
 
         # there were no problems loading the data file
-        print " no problem"
         return True
 
     def save(self):
