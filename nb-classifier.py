@@ -15,6 +15,7 @@ class Classifier:
         self.is_training = False
         self.stop_list = frozenset()
         self.confusion_matrix = {}
+        self.model = models.baseline
 
         # parse the arguments
         self.parse_args()
@@ -22,8 +23,6 @@ class Classifier:
         # prepare the categories collection
         self.categories = {}
         self.total_articles = 0
-
-        self.model = models.baseline
 
     def parse_args(self):
         # set up the arg-parser
