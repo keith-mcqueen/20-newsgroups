@@ -35,7 +35,9 @@ class Category:
                 self.word_counts = data[WORDS_KEY]
 
             # sum up all of the word counts
-            self.total_words = sum(self.word_counts.itervalues())
+            #self.total_words = sum(self.word_counts.itervalues())
+            for counts in self.word_counts.itervalues():
+                self.total_words += counts["multinomial"]
         except Exception, e:
             # if there was a problem, then the category did not load successfully
             print e

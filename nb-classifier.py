@@ -15,13 +15,15 @@ class Classifier:
         self.is_training = False
         self.stop_list = frozenset()
         self.confusion_matrix = {}
-        
+
         # parse the arguments
         self.parse_args()
 
         # prepare the categories collection
         self.categories = {}
         self.total_articles = 0
+
+        self.model = models.baseline
 
     def parse_args(self):
         # set up the arg-parser
@@ -52,11 +54,12 @@ class Classifier:
         parser.add_argument("--stop-list",
                             action='store',
                             help="Path to file containing the list of stop words (words to be excluded from indexing)")
-        
+
         # add the <debug> argument
         parser.add_argument("--model",
                             action='store',
-                            help="bernoulli, multinomial or baseline")
+                            help="bernoulli, multinomial or baseline",
+                            default="baseline")
 
         # parse the arguments
         args = parser.parse_args()
@@ -77,9 +80,11 @@ class Classifier:
             os.makedirs(self.database)
 
         self.is_training = args.training
-        print type(args.model)
+
+        print args.model
         self.model = getattr(models, args.model)
-        
+        print self.model
+
         # load the list of stop words
         try:
             self.stop_list = frozenset(open(args.stop_list).read().split())
@@ -124,8 +129,9 @@ class Classifier:
         for category_name in self.categories:
             category = self.categories[category_name]
             category.prior_probability = math.log(float(category.article_count) / float(self.total_articles))
-            print "Prior probability for category: %s is %s articles out of %s total articles = %s" % (category_name, category.article_count, self.total_articles, category.prior_probability)
-        
+            print "Prior probability for category: %s is %s articles out of %s total articles = %s" % (
+            category_name, category.article_count, self.total_articles, category.prior_probability)
+
         # TODO now what?
         for category_name in os.listdir(self.docroot):
             category_path = os.path.join(self.docroot, category_name)
@@ -135,32 +141,29 @@ class Classifier:
                 continue
 
             self.classify_category(category_path, self.model)
-        
+
         print self.confusion_matrix
-        
+
     def classify_category(self, category_path, model_func):
         confusion_row = {}
-		
+
         for article in os.listdir(category_path):
             article_words = {}
             parse_article(category_path, article, article_words, self.stop_list)
-			  
+
             best_probability = -sys.maxint - 1
             best_category = None
-			  
+
             for category_name in self.categories:
-                #Compute the P(c|document)
                 probability = model_func(self.categories[category_name], article_words)
                 if probability > best_probability:
                     best_probability = probability
                     best_category = category_name
-            
+
             confusion_row[best_category] = confusion_row.setdefault(best_category, 0) + 1
-        
+
         self.confusion_matrix[os.path.basename(category_path)] = confusion_row
-     				 
-				 
-	      
+
 
 if __name__ == '__main__':
     c = Classifier()
