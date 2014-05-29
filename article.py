@@ -12,9 +12,9 @@ def parse_article(filepath, filename, dictionary, stop_words=None):
         for word in str.split(input_str):
             if word not in stop_words:
                 word = word.lower()
-                dictionary[word] = dictionary.setdefault(word, {"multinomial": 0, "bernoulli": 0})
-                dictionary[word]["multinomial"] += 1
+                dictionary[word] = dictionary.setdefault(word, {"m": 0, "b": 0})
+                dictionary[word]["m"] += 1
 
                 if word not in found_words:
-                    dictionary[word]["bernoulli"] += 1
+                    dictionary[word]["b"] += 1
                     found_words.add(word)
