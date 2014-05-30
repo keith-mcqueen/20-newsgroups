@@ -9,7 +9,7 @@ def bernoulli(category, article_words):
         if word in category.word_counts:
             word_probability = category.word_counts[word]["b"]
         else:
-            word_probability = 1
+            word_probability = 1 - 1/len(article_words)
 
         probability += math.log(word_probability)
 
@@ -23,7 +23,7 @@ def multinomial(category, article_words):
         if word in category.word_counts:
             word_probability = category.word_counts[word]["m"]
         else:
-            word_probability = 1
+            word_probability = 1 - 1/len(article_words)
 
         probability += math.log(word_probability)
 
